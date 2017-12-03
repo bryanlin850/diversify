@@ -47,6 +47,5 @@ if __name__ == "__main__":
         song_api_path = song_info["result"]["api_path"]
         lyrics = lyrics_from_song_api_path(song_api_path)
         # print(lyrics)
-    else:
-        break
+    
 
