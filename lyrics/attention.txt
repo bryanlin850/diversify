@@ -1,10 +1,3 @@
-[ti:Attention]
-[ar:Charlie Puth]
-[by:bryanlin850]
-[la:EN]
-[re:LRCgenerator.com]
-[ve:3.00]
-
 [00:04.32]Woah-oah, hm-hmm
 
 [00:09.58]You've been runnin' 'round, runnin' 'round, runnin' 'round
@@ -72,5 +65,3 @@
 [03:16.85]What are you doin' huh? (You're just making sure I'm never gettin' over you)
 [03:19.50]What are you doin' to me?
 [03:21.58]What are you doin', huh?
-
-[03:24.53]--- www.LRCgenerator.com ---

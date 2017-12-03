@@ -1,9 +1,3 @@
-[ti:title]
-[by:bryanlin850]
-[la:EN]
-[re:LRCgenerator.com]
-[ve:3.00]
-
 [00:14.69]Well, you almost had me fooled
 [00:20.34]Told me that I was nothing without you
 [00:27.04]Oh, but after everything you've done
@@ -47,5 +41,3 @@
 [03:20.93]I hope your soul is changin', changin'
 [03:30.75]I hope you find your peace
 [03:35.54]Falling on your knees, prayin'
-
-[03:43.46]--- www.LRCgenerator.com ---
