@@ -4,7 +4,8 @@ November 2017
 ENGM 3700 Project
 https://github.com/bryanlin850/diversify
 """
-import requests, re
+import requests
+import re
 from bs4 import BeautifulSoup
 
 base_url = "http://api.genius.com"
@@ -46,6 +47,20 @@ if __name__ == "__main__":
     if song_info:
         song_api_path = song_info["result"]["api_path"]
         lyrics = lyrics_from_song_api_path(song_api_path)
+        lyrics += '[]'
         # print(lyrics)
-    
-
+    q = 'Verse 1'
+    lyrics = lyrics.split('[')
+    lyrics = lyrics[:-1]
+    # s1 = re.escape(q) + r"]"
+    # m_regex = re.compile(s1)
+    base_lyr = ''
+    for sect in lyrics:
+        if q in sect:
+            base_lyr = sect
+            break
+    base_lyr = base_lyr.split(']')
+    base_lyr = base_lyr[1]
+    base_lyr = base_lyr.split('\n')
+    base_lyr[:] = [item for item in base_lyr if item]
+    print(base_lyr)
