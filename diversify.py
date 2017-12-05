@@ -6,13 +6,12 @@ https://github.com/bryanlin850/diversify
 """
 import requests
 from bs4 import BeautifulSoup
+import pygame
+import time as tlib
 
 base_url = "http://api.genius.com"
 headers = {
     'Authorization': 'Bearer d2FBpnZfxtalLk0GwBF6noxKVwl-8FiH3tifBroK6LfyPG90EeAc-mSCkyoBlviT'}
-
-song_title = "Attention"
-artist_name = "Charlie Puth"
 
 
 def lyrics_from_song_api_path(song_api_path):
@@ -42,6 +41,20 @@ def lyrics_from_song_api_path(song_api_path):
 if __name__ == "__main__":
     # search URL is http://api.genius.com/search
     search_url = base_url + "/search"
+    song_title = input('Enter the song title: ')
+    if song_title == "Attention":
+        song_title = "Attention"
+    elif song_title == "Praying":
+        song_title = "Praying"
+    else:
+        song_title = "Feel It Still"
+    artist_name = input('Enter the artist name: ')
+    if artist_name == "Charlie Puth":
+        artist_name = "Charlie Puth"
+    elif artist_name == "Kesha":
+        artist_name = "Kesha"
+    else:
+        artist_name = "Portugal. The Man"
     data = {'q': song_title}
     # putting together the request for the requests library
     response = requests.get(search_url, params=data, headers=headers)
@@ -60,7 +73,7 @@ if __name__ == "__main__":
     # q is the query
     # After Alexa integration, the query will be input by the user with voice input.
     # For now, the query is specified in the code or through the command line.
-    q = 'Verse 1'
+    q = input('Enter the desired section: ')
     # split the lyrics by the '[' character
     lyrics = lyrics.split('[')
     # take everything but the last character (which will always be ']')
@@ -92,12 +105,16 @@ if __name__ == "__main__":
     # clean up the lyrics by removing empty elements
     base_lyr[:] = [item for item in base_lyr if item]
     time_name = ''
+    mp3_name = ''
     if song_title is 'Attention':
         time_name = 'lyrics/attention.txt'
+        mp3_name = 'songs/attention.ogg'
     elif song_title is 'Praying':
         time_name = 'lyrics/praying.txt'
+        mp3_name = 'songs/praying.ogg'
     else:
         time_name = 'lyrics/feel_it_still.txt'
+        mp3_name = 'songs/feel_it_still.ogg'
     time_lyr = ''
     time = ''
     with open(time_name, 'r') as f:
@@ -153,4 +170,15 @@ if __name__ == "__main__":
                         break
                 else:
                     break
-    print(time)
+    time_float = 60.0 * float(time[0:2]) + float(time[3:])
+    pygame.init()
+    pygame.mixer.init()
+    pygame.mixer.music.load(mp3_name)
+    if time_float > 2.0:
+        time_float -= 2.0
+    pygame.mixer.music.play(0, time_float)
+    stop_cmd = ''
+    while stop_cmd != 'stop':
+        stop_cmd = input('Enter stop to stop the music: ')
+        if stop_cmd == 'stop':
+            pygame.mixer.music.stop()
