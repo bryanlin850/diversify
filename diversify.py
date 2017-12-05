@@ -7,7 +7,6 @@ https://github.com/bryanlin850/diversify
 import requests
 from bs4 import BeautifulSoup
 import pygame
-import time as tlib
 
 base_url = "http://api.genius.com"
 headers = {
@@ -38,53 +37,53 @@ def lyrics_from_song_api_path(song_api_path):
     return lyrics
 
 
-if __name__ == "__main__":
-    # search URL is http://api.genius.com/search
-    search_url = base_url + "/search"
-    song_title = input('Enter the song title: ')
-    if song_title == "Attention":
-        song_title = "Attention"
-    elif song_title == "Praying":
-        song_title = "Praying"
-    else:
-        song_title = "Feel It Still"
-    artist_name = input('Enter the artist name: ')
-    if artist_name == "Charlie Puth":
-        artist_name = "Charlie Puth"
-    elif artist_name == "Kesha":
-        artist_name = "Kesha"
-    else:
-        artist_name = "Portugal. The Man"
-    data = {'q': song_title}
-    # putting together the request for the requests library
-    response = requests.get(search_url, params=data, headers=headers)
-    json = response.json()
-    song_info = None
-    for hit in json['response']['hits']:
-        if hit["result"]["primary_artist"]["name"] == artist_name:
-            song_info = hit
-            break
-    lyrics = ''
-    if song_info:
-        song_api_path = song_info["result"]["api_path"]
-        lyrics = lyrics_from_song_api_path(song_api_path)
-        lyrics += '[]'
+def get_sections(lyrics):
+    """
+    Print to the console which sections are available for a given song.
+    @params:
+        lyrics, a list of strings where each string is a section
+    @return:
+        sections, a list of strings of the section names
+    """
+    sections = []
+    for sect in lyrics:
+        section = sect.split(']')[0]
+        i = 1
+        tmp = section
+        while tmp in sections:
+            tmp = section
+            i += 1
+            tmp += ' ' + str(i)
+        section = tmp
+        sections.append(section)
+    return sections
 
-    # q is the query
-    # After Alexa integration, the query will be input by the user with voice input.
-    # For now, the query is specified in the code or through the command line.
-    q = input('Enter the desired section: ')
-    # split the lyrics by the '[' character
-    lyrics = lyrics.split('[')
-    # take everything but the last character (which will always be ']')
-    lyrics = lyrics[: -1]
+
+def play_section(song_title, lyrics, q):
+    """
+    Given a song title, lyrics, and query, play a section.
+    @params:
+        song_title, a str that indicates the song title
+        lyrics, a list of str's that contains the lyrics
+        q, a str that is the desired section
+    @return:
+        None, simply plays the section
+    """
     base_lyr = ''
+    if not q.startswith('Verse'):
+        q = q.split(' ')
+        if len(q) > 1:
+            q[1] = int(q[1])
+        else:
+            q.append(1)
+    else:
+        q = [q]
     for sect in lyrics:
         # search the Genius lyrics for the desired section
-        if sect.startswith(q):
+        if sect.startswith(q[0]):
             base_lyr = sect
             break
-    
+
     """
     The lyrics in their current form look something like this:
         Verse 1]\n
@@ -157,6 +156,7 @@ if __name__ == "__main__":
         time_lyr[:] = [[item.split(']') for item in sect[1:]]
                        for sect in time_lyr]
         found_bool = False
+        q_i = 1
         for sect in time_lyr:
             if found_bool:
                 break
@@ -166,8 +166,11 @@ if __name__ == "__main__":
                     time = sect[0][0]
                     i += 1
                     if i == len(base_lyr):
-                        found_bool = True
-                        break
+                        if len(q) > 1 and q_i == q[1]:
+                            found_bool = True
+                            break
+                        else:
+                            q_i += 1
                 else:
                     break
     time_float = 60.0 * float(time[0:2]) + float(time[3:])
@@ -182,3 +185,67 @@ if __name__ == "__main__":
         stop_cmd = input('Enter stop to stop the music: ')
         if stop_cmd == 'stop':
             pygame.mixer.music.stop()
+
+
+if __name__ == "__main__":
+    # search URL is http://api.genius.com/search
+    search_url = base_url + "/search"
+    print('Do you want to pick a song by title or by BPM?')
+    select_method = input('Enter 1 for title and 2 for BPM: ')
+    song_title = ''
+    artist_name = ''
+    if select_method == '1':
+        song_title = input('Enter the song title: ')
+        if song_title == "Attention":
+            song_title = "Attention"
+        elif song_title == "Praying":
+            song_title = "Praying"
+        else:
+            song_title = "Feel It Still"
+        artist_name = input('Enter the artist name: ')
+        if artist_name == "Charlie Puth":
+            artist_name = "Charlie Puth"
+        elif artist_name == "Kesha":
+            artist_name = "Kesha"
+        else:
+            artist_name = "Portugal. The Man"
+    else:
+        print('Do you want a fast song, a medium-tempo song, or a slow song?')
+        bpm_select = input('Enter 1 for fast, 2 for medium, and 3 for slow: ')
+        if bpm_select == '1':
+            song_title = "Feel It Still"
+            artist_name = "Portugal. The Man"
+        elif bpm_select == '2':
+            song_title = "Attention"
+            artist_name = "Charlie Puth"
+        else:
+            song_title = "Praying"
+            artist_name = "Kesha"
+    data = {'q': song_title}
+    # putting together the request for the requests library
+    response = requests.get(search_url, params=data, headers=headers)
+    json = response.json()
+    song_info = None
+    for hit in json['response']['hits']:
+        if hit["result"]["primary_artist"]["name"] == artist_name:
+            song_info = hit
+            break
+    lyrics = ''
+    if song_info:
+        song_api_path = song_info["result"]["api_path"]
+        lyrics = lyrics_from_song_api_path(song_api_path)
+        lyrics += '[]'
+
+    # split the lyrics by the '[' character
+    lyrics = lyrics.split('[')
+    # take everything but the first character ('\n\n')
+    # and last character (which will always be ']')
+    lyrics = lyrics[1:-1]
+    print('These are the available sections: ')
+    for section in get_sections(lyrics):
+        print(section)
+    # q is the query
+    # After Alexa integration, the query will be input by the user with voice input.
+    # For now, the query is specified in the code or through the command line.
+    q = input('Enter the desired section: ')
+    play_section(song_title, lyrics, q)
