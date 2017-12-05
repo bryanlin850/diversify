@@ -5,7 +5,6 @@ ENGM 3700 Project
 https://github.com/bryanlin850/diversify
 """
 import requests
-import re
 from bs4 import BeautifulSoup
 
 base_url = "http://api.genius.com"
@@ -48,19 +47,45 @@ if __name__ == "__main__":
         song_api_path = song_info["result"]["api_path"]
         lyrics = lyrics_from_song_api_path(song_api_path)
         lyrics += '[]'
-        # print(lyrics)
     q = 'Verse 1'
     lyrics = lyrics.split('[')
     lyrics = lyrics[:-1]
-    # s1 = re.escape(q) + r"]"
-    # m_regex = re.compile(s1)
     base_lyr = ''
     for sect in lyrics:
-        if q in sect:
+        if sect.startswith(q):
             base_lyr = sect
             break
     base_lyr = base_lyr.split(']')
     base_lyr = base_lyr[1]
     base_lyr = base_lyr.split('\n')
     base_lyr[:] = [item for item in base_lyr if item]
-    print(base_lyr)
+    time_name = ''
+    if song_title is 'Attention':
+        time_name = 'lyrics/attention.txt'
+    elif song_title is 'Praying':
+        time_name = 'lyrics/praying.txt'
+    else:
+        time_name = 'lyrics/feel_it_still.txt'
+    time_lyr = ''
+    time = ''
+    with open(time_name, 'r') as f:
+        time_lyr = f.read()
+        time_lyr = time_lyr.split('\n\n')
+        time_lyr[:] = [item.replace('\n', '').split('[') for item in time_lyr]
+        time_lyr[:] = [[item.split(']') for item in para[1:]]
+                       for para in time_lyr]
+        found_bool = False
+        for para in time_lyr:
+            if found_bool:
+                break
+            i = 0
+            for line in para:
+                if line[1] == base_lyr[i]:
+                    time = para[0][0]
+                    i += 1
+                    if i == len(base_lyr):
+                        found_bool = True
+                        break
+                else:
+                    break
+    print(time)
